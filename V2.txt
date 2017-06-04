@@ -1,0 +1,86 @@
+sqlite3 BLENDERBOTTLE.db
+
+PRAGMA foreign_keys = ON;
+
+drop table UGroup;
+drop table User;
+drop table UGroup_Members;
+drop table Post;
+drop table Reply;
+drop table Tag;
+drop table Reaction;
+
+
+create table UGroup( groupID CHAR(9) PRIMARY KEY,
+					groupName VARCHAR(20),
+					Description VARCHAR(50));
+					
+create table User(	userID CHAR(9) PRIMARY KEY,
+					U_name VARCHAR(20),
+					b_Day Date,
+					city VARCHAR(20),
+					State CHAR(2),
+					U_description VARCHAR(50));
+					
+create table UGroup_Members(	GM_groupID CHAR(9) References UGroup (groupID),
+								GM_userID CHAR(9) References User (userID));
+							
+create table Post(	P_userID CHAR(9) References User (userID),
+					postID CHAR(9) PRIMARY KEY,
+					postTitle VARCHAR(20),
+					postMSG VARCHAR(50),
+					datetime Date,
+					numReplies INTEGER);
+
+create table Reply(	OP_postID CHAR(9) References POST (postID),
+					Rep_postID CHAR(9) References POST (postID));
+					
+create table Tag(	T_postID CHAR(9) References POST(postID),
+					tagID CHAR(9) PRIMARY KEY,
+					T_userTagID References User (userID),
+					T_userID References User (userID));
+					
+create table Reaction(	React_postID CHAR(9) References POST (postID),
+						reactID CHAR(9) PRIMARY KEY,
+						React_userID CHAR(9) References User (userID),
+						reactionType INTEGER);
+						
+create trigger Reaction_increment After Insert ON Reaction
+Begin
+	Update POST Set numReplies = numReplies + 1 WHERE new.React_postID = postID;
+END;
+
+Insert Into UGroup Values(	'123456789', 'team blenderbottle', 'database team that blends bottles');
+Insert Into UGroup Values(	'987654321', 'Cool people', 'Interesting people');
+
+Insert Into User Values(	'111111111', 'Arthur Khuu', '2000-02-03', 'Tacoma', 'WA', 'Person1');
+
+Insert Into User Values(	'222222222', 'Danny Ly', '2000-02-03', 'Seattle', 'WA', 'Person2');
+
+Insert Into User Values(	'333333333', 'Kien Chin', '2000-02-03', 'Bothell', 'WA', 'Person3');
+
+Insert Into User Values(	'444444444', 'Mark', '2000-02-03', 'Lynnwood', 'WA', 'Person4');
+
+Insert Into UGroup_Members Values(	'123456789', '111111111');
+
+Insert Into UGroup_Members Values(	'123456788', '111111111');
+
+Insert Into UGroup_Members Values(	'123456789', '222222222');
+
+Insert Into UGroup_Members Values(	'123456789', '333333333');
+
+Insert Into UGroup_Members Values(	'123456789', '444444444');
+
+Insert Into Post Values(	'111111111', '135798642', 'Title', 'Bonjour Mon Amie', '2017-01-01', 0);
+
+Insert Into Post Values(	'222222222', '246897531', 'Title', 'Many Many Words', '2017-05-24', 0);
+
+Insert Into Post Values(	'333333333', '159732846', 'Title', 'Semi-Interesting Stuff', '2017-03-17', 0);
+
+Insert Into Post Values(	'444444444', '314159862', 'Title', 'Less Interesting Stuff', '2017-03-18', 0);
+
+Insert Into Reply Values(	'159732846', '314159862');
+
+Insert Into Tag Values(	'314159862', '999999999', '111111111', '333333333');
+
+Insert Into Reaction Values(	'159732846', '555555555', '222222222', 1);
